@@ -8,6 +8,14 @@ async function loadDelegations (account, callback) {
   await getTransactions(account, -1, callback)
 }
 
+async function loadDelegationsAsync (account) {
+  return new Promise(async function (resolve, reject) {
+    await getTransactions(account, -1, function (delegating) {
+      resolve(delegating)
+    })
+  })
+}
+
 async function getTransactions (account, start, callback) {
   var lastTrans = start
 
@@ -276,6 +284,7 @@ async function getPost (username, permlink) {
 
 module.exports = {
   loadDelegations: loadDelegations,
+  loadDelegationsAsync: loadDelegationsAsync,
   getWeights: getWeights,
   payoutCalculator: payoutCalculator,
   getAccountInfo: getAccountInfo,

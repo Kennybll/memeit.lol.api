@@ -24,8 +24,7 @@ async function memeList (params, id) {
 }
 
 async function getFeed (params, id) {
-  let posts = await db.Post.find({hidden: false}).sort({time: -1}).limit(10 * params.number)
-  console.log(posts)
+  let posts = await db.Post.find({hidden: false}).sort({time: -1}).skip(params.number > 0 ? 10 * params.number : 0).limit(10)
   posts = await Promise.all(posts.map(async function (post) {
     post.payout = await delegators.payoutCalculator(post.author, post.permlink)
     return post
@@ -50,21 +49,22 @@ async function getUser (params, id) {
 }
 
 async function getDelegators (params, id) {
-  delegators.loadDelegations('memeit.lol', function (delegating) {
-    return {'jsonrpc': '2.0', 'result': {delegating}, 'id': id}
-  })
+  let delegating = await delegators.loadDelegationsAsync('memeit.lol')
+  return {'jsonrpc': '2.0', 'result': {delegating}, 'id': id}
 }
 
 async function getPost (params, id) {
-  delegators.getPost(params.username, params.permlink).then(async function (i) {
-    i.img = await delegators.getImg(params.username)
-    return i
-  }).then(async function (i) {
-    i.comments = await delegators.getComments(params.username, params.permlink)
-    return i
-  }).then(async function (i) {
-    i.payout = await delegators.payoutCalculator(params.username, params.permlink)
-    return {'jsonrpc': '2.0', 'result': {post: i}, 'id': id}
+  return new Promise(function (resolve, reject) {
+    delegators.getPost(params.username, params.permlink).then(async function (i) {
+      i.img = await delegators.getImg(params.username)
+      return i
+    }).then(async function (i) {
+      i.comments = await delegators.getComments(params.username, params.permlink)
+      return i
+    }).then(async function (i) {
+      i.payout = await delegators.payoutCalculator(params.username, params.permlink)
+      resolve({'jsonrpc': '2.0', 'result': {post: i}, 'id': id})
+    })
   })
 }
 
@@ -134,7 +134,7 @@ function createPost (params, id) {
   let primaryTag = 'memeitlol'
   let otherTags = tags.slice(0, 4)
   let done = false
-  delegators('memeit.lol', function (data) {
+  delegators.getWeights('memeit.lol', function (data) {
     if (!done) {
       let ben = []
       for (let key in data) {
