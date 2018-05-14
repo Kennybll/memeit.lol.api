@@ -57,10 +57,18 @@ app.get('/v1/meme/:filename', function (req, res) {
 
 app.get('/v1/stickers', function (req, res) {
   let images = []
-  images.push(fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
-  images.push(fs.readdirSync('../memes/Stickers/Communities').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
-  images.push(fs.readdirSync('../memes/Stickers/Crypto').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
-  images.push(fs.readdirSync('../memes/Stickers/Faces').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
+  fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
+    images.push(sticker)
+  })
+  fs.readdirSync('../memes/Stickers/Communities').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
+    images.push(sticker)
+  })
+  fs.readdirSync('../memes/Stickers/Crypto').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
+    images.push(sticker)
+  })
+  fs.readdirSync('../memes/Stickers/Faces').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
+    images.push(sticker)
+  })
   res.json({status: 'ok', images})
 })
 
