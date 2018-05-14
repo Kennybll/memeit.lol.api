@@ -27,9 +27,9 @@ app.post('/v1/new', async function (req, res) {
   })
 })
 
-app.get('/v1/sticker/:filename', function (req, res) {
+app.get('/v1/sticker/:category/:filename', function (req, res) {
   res.setHeader('Content-Type', 'image/png')
-  jimp.read('../memes/Stickers/' + req.params.filename, (err, re) => {
+  jimp.read('../memes/Stickers/' + req.params.category + '/' + req.params.filename, (err, re) => {
     if (!err) {
       let scale = 200 / re.bitmap.height
       re.scale(scale)
@@ -59,7 +59,7 @@ app.get('/v1/thumbnail/:filename', function (req, res) {
   res.setHeader('Content-Type', 'image/png')
   jimp.read('../memes/' + req.params.filename, (err, re) => {
     if (!err) {
-      let scale = 50 / re.bitmap.height
+      let scale = 100 / re.bitmap.height
       re.scale(scale)
         .getBuffer(jimp.MIME_PNG, (err, buff) => {
           if (err) console.log(err)
@@ -71,18 +71,10 @@ app.get('/v1/thumbnail/:filename', function (req, res) {
 
 app.get('/v1/stickers', function (req, res) {
   let images = []
-  fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
-    images.push(sticker)
-  })
-  fs.readdirSync('../memes/Stickers/Communities').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
-    images.push(sticker)
-  })
-  fs.readdirSync('../memes/Stickers/Crypto').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
-    images.push(sticker)
-  })
-  fs.readdirSync('../memes/Stickers/Faces').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
-    images.push(sticker)
-  })
+  images.push({category: 'Accessories', images: fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+  images.push({category: 'Communities', images: fs.readdirSync('../memes/Stickers/Communities').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+  images.push({category: 'Crypto', images: fs.readdirSync('../memes/Stickers/Crypto').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+  images.push({category: 'Faces', images: fs.readdirSync('../memes/Stickers/Faces').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
   res.json({status: 'ok', images})
 })
 
