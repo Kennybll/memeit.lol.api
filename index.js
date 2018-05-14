@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const fs = require('fs')
 const bodyParser = require('body-parser')
-const uuid = require('uuid/v4')
+const jimp = require('jimp')
 const cors = require('cors')
 const config = require('./config')
 
@@ -17,24 +17,56 @@ app.use(cors())
 app.use(bodyParser.json({ limit: '100mb' }))
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: false }))
 
-app.post('/new', async function(req, res) {
+app.post('/v1/new', async function (req, res) {
   let image = req.body.image
   pixel.upload(image).then(result => {
-    res.json({status: "ok", filename: result.secure_url})
+    res.json({status: 'ok', filename: result.secure_url})
   }).catch(err => {
     console.log(err)
     res.sendStatus(500)
   })
 })
 
-app.get('/memes', function(req, res) {
-  res.json({status: "ok", images: fs.readdirSync('../memes').filter(function(l) {return l.includes('.png') || l.includes('.jpg')})})
+app.get('/v1/sticker/:filename', function (req, res) {
+  res.setHeader('Content-Type', 'image/png')
+  jimp.read('../memes/Stickers/' + req.params.name, (err, re) => {
+    if (!err) {
+      let scale = 200 / re.bitmap.height
+      re.scale(scale)
+        .getBuffer(jimp.MIME_PNG, (err, buff) => {
+          if (err) console.log(err)
+          res.send(buff)
+        })
+    }
+  })
 })
 
-app.get('/', function(req, res) {
-  res.json({status: "ok"})
+app.get('/v1/meme/:filename', function (req, res) {
+  res.setHeader('Content-Type', 'image/png')
+  jimp.read('../memes/' + req.params.name, (err, re) => {
+    if (!err) {
+      let scale = 500 / re.bitmap.height
+      re.scale(scale)
+        .getBuffer(jimp.MIME_PNG, (err, buff) => {
+          if (err) console.log(err)
+          res.send(buff)
+        })
+    }
+  })
 })
 
-app.listen(3001, function() {
+app.get('/v1/stickers', function (req, res) {
+  res.json({status: 'ok', images: fs.readdirSync('../memes/Stickers').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+})
+
+app.get('/v1/memes', function (req, res) {
+  res.json({status: 'ok', images: fs.readdirSync('../memes').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+})
+
+app.get('/v1/', function (req, res) {
+  res.json({status: 'ok'})
+})
+
+app.listen(3001, function () {
   console.log('Started')
 })
