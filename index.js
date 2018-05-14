@@ -29,7 +29,7 @@ app.post('/v1/new', async function (req, res) {
 
 app.get('/v1/sticker/:filename', function (req, res) {
   res.setHeader('Content-Type', 'image/png')
-  jimp.read('../memes/Stickers/' + req.params.name, (err, re) => {
+  jimp.read('../memes/Stickers/' + req.params.filename, (err, re) => {
     if (!err) {
       let scale = 200 / re.bitmap.height
       re.scale(scale)
@@ -43,7 +43,7 @@ app.get('/v1/sticker/:filename', function (req, res) {
 
 app.get('/v1/meme/:filename', function (req, res) {
   res.setHeader('Content-Type', 'image/png')
-  jimp.read('../memes/' + req.params.name, (err, re) => {
+  jimp.read('../memes/' + req.params.filename, (err, re) => {
     if (!err) {
       let scale = 500 / re.bitmap.height
       re.scale(scale)
@@ -56,7 +56,12 @@ app.get('/v1/meme/:filename', function (req, res) {
 })
 
 app.get('/v1/stickers', function (req, res) {
-  res.json({status: 'ok', images: fs.readdirSync('../memes/Stickers').filter(function (l) { return l.includes('.png') || l.includes('.jpg') })})
+  let images = []
+  images.push(fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
+  images.push(fs.readdirSync('../memes/Stickers/Communities').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
+  images.push(fs.readdirSync('../memes/Stickers/Crypto').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
+  images.push(fs.readdirSync('../memes/Stickers/Faces').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }))
+  res.json({status: 'ok', images})
 })
 
 app.get('/v1/memes', function (req, res) {
