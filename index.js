@@ -55,6 +55,20 @@ app.get('/v1/meme/:filename', function (req, res) {
   })
 })
 
+app.get('/v1/thumbnail/:filename', function (req, res) {
+  res.setHeader('Content-Type', 'image/png')
+  jimp.read('../memes/' + req.params.filename, (err, re) => {
+    if (!err) {
+      let scale = 50 / re.bitmap.height
+      re.scale(scale)
+        .getBuffer(jimp.MIME_PNG, (err, buff) => {
+          if (err) console.log(err)
+          res.send(buff)
+        })
+    }
+  })
+})
+
 app.get('/v1/stickers', function (req, res) {
   let images = []
   fs.readdirSync('../memes/Stickers/Accessories').filter(function (l) { return l.includes('.png') || l.includes('.jpg') }).forEach(function (sticker) {
